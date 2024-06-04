@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using NZWalk.API.Models.Dto;
 using NZWalk.API.Models.DTO;
+using NZWalk.API.Repositories;
 
 namespace NZWalk.API.Controllers
 {
@@ -11,10 +13,12 @@ namespace NZWalk.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
+        private readonly ITokenRepository tokenRepository;
 
-        public AuthController(UserManager<IdentityUser> userManager) 
+        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository) 
         {
             this.userManager = userManager;
+            this.tokenRepository = tokenRepository;
         }
 
 
@@ -45,6 +49,43 @@ namespace NZWalk.API.Controllers
             }
 
             return BadRequest("Something went wrong!!");
+        }
+
+        // POST: /api/Auth/Login
+        [HttpPost]
+        [Route("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto) 
+        {
+            var user = await userManager.FindByEmailAsync(loginRequestDto.Username);
+
+            if (user != null)
+            {
+                var checkPasswordResult = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+
+                if (checkPasswordResult)
+                {
+                    //Get Role from User
+
+                    var roles = await userManager.GetRolesAsync(user);
+
+                    if (roles != null) 
+                    {
+                        //create token
+
+                        var jwttoken = tokenRepository.CreateJWTToken(user,roles.ToList());
+                        var response = new LoginResponseDto
+                        {
+                            JwtToken = jwttoken,
+                        };
+
+                        return Ok(response);
+                    }
+
+                }
+            }
+
+            return BadRequest("Username or password incorrect");
+
         }
     }
 }

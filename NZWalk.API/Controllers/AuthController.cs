@@ -24,6 +24,7 @@ namespace NZWalk.API.Controllers
 
         // POST : /api/Auth/Register
         [HttpPost]
+        [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto) 
         {
             var identityUser = new IdentityUser
@@ -53,7 +54,7 @@ namespace NZWalk.API.Controllers
 
         // POST: /api/Auth/Login
         [HttpPost]
-        [Route("Login")]
+        [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto) 
         {
             var user = await userManager.FindByEmailAsync(loginRequestDto.Username);

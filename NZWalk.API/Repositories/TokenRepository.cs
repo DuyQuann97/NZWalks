@@ -33,7 +33,7 @@ namespace NZWalk.API.Repositories
                 configuration["Jwt:Issuer"],
                 configuration["Jwt:Audiance"],
                 claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddHours(1),
                 signingCredentials: credentials
                 );
 
